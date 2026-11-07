@@ -29,10 +29,18 @@ Requirements: Python 3.9+ — nothing to `pip install`.
    cp .env.example .env
    ```
 
+   (Windows PowerShell: `copy .env.example .env`, then edit `.env` in your editor.)
+
 3. Start the server:
 
    ```bash
    python3 server.py
+   ```
+
+   On **Windows** the command is `python` (or `py`), not `python3`:
+
+   ```powershell
+   python server.py
    ```
 
 4. Open <http://127.0.0.1:8000> in your browser.

@@ -8,7 +8,8 @@ API key stays on your machine (it is never sent to the browser).
 Only the Python standard library is used: no pip install needed.
 
     cp .env.example .env      # then put your key in .env
-    python3 server.py         # open http://127.0.0.1:8000
+    python3 server.py         # Windows: python server.py
+                              # then open http://127.0.0.1:8000
 """
 
 from __future__ import annotations
@@ -60,7 +61,13 @@ def load_dotenv(path: Path) -> None:
     Real environment variables take precedence over the file."""
     if not path.is_file():
         return
-    for raw in path.read_text(encoding="utf-8").splitlines():
+    raw_bytes = path.read_bytes()
+    # Windows editors / PowerShell redirection may save UTF-16 or UTF-8 with BOM.
+    if raw_bytes.startswith((b"\xff\xfe", b"\xfe\xff")):
+        text = raw_bytes.decode("utf-16")
+    else:
+        text = raw_bytes.decode("utf-8-sig", errors="replace")
+    for raw in text.splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
@@ -329,7 +336,7 @@ def main() -> None:
     httpd.daemon_threads = True
     print(f"Model comparison chat running on http://{HOST}:{PORT}")
     if not API_KEY:
-        print("WARNING: OPENROUTER_API_KEY is not set — copy .env.example to .env and add your key.")
+        print("WARNING: OPENROUTER_API_KEY is not set - copy .env.example to .env and add your key.")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
