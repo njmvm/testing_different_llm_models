@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Model Compare Chat</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <!-- Markdown rendering (optional: falls back to plain text if offline) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <!-- ============ Sidebar: subject, models, parameters ============ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <h1>Model Compare</h1>
+        <span class="sub">Same question, many models, side by side</span>
+      </div>
+
+      <div id="keyWarning" class="warning" hidden>
+        No <code>OPENROUTER_API_KEY</code> found. Copy <code>.env.example</code> to <code>.env</code>,
+        paste your key, and restart <code>python3 server.py</code>.
+      </div>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Subject / system prompt</h2>
+        </div>
+        <textarea id="systemPrompt" rows="7"
+          placeholder="Describe your field and how you want answers, e.g.&#10;&#10;You are an expert in hydrogeology. Answer for a professional audience, cite standards where relevant, and say when you are unsure."></textarea>
+        <div class="row">
+          <select id="presetSelect" title="Saved subject presets">
+            <option value="">— Saved presets —</option>
+          </select>
+          <button id="savePresetBtn" class="ghost small" title="Save current prompt as a preset">Save</button>
+          <button id="deletePresetBtn" class="ghost small" title="Delete selected preset">Delete</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Models <span class="count" id="modelCount">0</span></h2>
+        </div>
+        <div id="selectedModels" class="chips"></div>
+        <input id="modelSearch" type="search" placeholder="Search OpenRouter models (e.g. claude, gpt, llama)…" autocomplete="off" />
+        <div id="modelResults" class="model-results"></div>
+        <label class="check"><input type="checkbox" id="freeOnly" /> Show free models only</label>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Parameters</h2></div>
+        <label class="field">
+          <span>Temperature <output id="tempOut">0.7</output></span>
+          <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7" />
+        </label>
+        <label class="field">
+          <span>Max output tokens</span>
+          <input type="number" id="maxTokens" min="1" step="1" placeholder="model default" />
+        </label>
+        <label class="field">
+          <span>Reasoning effort (models that support it)</span>
+          <select id="reasoning">
+            <option value="">Model default</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="blindMode" />
+          Blind mode (hide &amp; shuffle model names until you reveal them)
+        </label>
+      </section>
+    </aside>
+
+    <!-- ============ Main area: columns + composer ============ -->
+    <main class="main">
+      <header class="toolbar">
+        <button id="toggleSidebar" class="ghost" title="Show / hide settings">☰</button>
+        <div class="spacer"></div>
+        <span id="totalCost" class="muted"></span>
+        <button id="revealBtn" class="ghost" hidden>Reveal models</button>
+        <button id="exportMdBtn" class="ghost" title="Download as Markdown">Export .md</button>
+        <button id="exportJsonBtn" class="ghost" title="Download as JSON">Export .json</button>
+        <button id="saveServerBtn" class="ghost" title="Save into the transcripts/ folder">Save to transcripts/</button>
+        <button id="newChatBtn" class="ghost danger">New chat</button>
+      </header>
+
+      <section id="columns" class="columns">
+        <div class="empty">
+          <h2>Pick some models and ask a question</h2>
+          <p>Each model gets the same system prompt and your messages, and keeps its own conversation
+            history, so you can follow up and see how each one reasons through your subject.</p>
+        </div>
+      </section>
+
+      <footer class="composer">
+        <textarea id="userInput" rows="3"
+          placeholder="Ask your question… (Ctrl/⌘ + Enter to send)"></textarea>
+        <div class="composer-actions">
+          <button id="sendBtn" class="primary">Send to all</button>
+          <button id="stopBtn" class="ghost" hidden>Stop</button>
+        </div>
+      </footer>
+    </main>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+</body>
+</html>
